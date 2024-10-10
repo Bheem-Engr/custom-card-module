@@ -14,8 +14,7 @@ Choose from a variety of pre-designed styles and features to create sections tai
 ## Installation
 
 1. Download the module from the [HubSpot Marketplace](https://ecosystem.hubspot.com/marketplace/modules/customized-card-module-by-clearpivot).
-2. Import the module into your HubSpot account.
-3. Drag and drop the Customized Card module into your webpage or landing page.
+2. Drag and drop the Customized Card module into your webpage or landing page.
 
 ## Usage
 
