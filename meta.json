@@ -1,0 +1,10 @@
+{
+  "global" : false,
+  "content_types" : [ "LANDING_PAGE", "SITE_PAGE", "BLOG_LISTING", "BLOG_POST" ],
+  "categories" : [ "TEXT" ],
+  "icon" : "https://189441.fs1.hubspotusercontent-na1.net/hubfs/189441/text_snippet.svg",
+  "host_template_types" : [ "PAGE", "BLOG_LISTING", "BLOG_POST" ],
+  "module_id" : 162657912948,
+  "label" : "Customized Card",
+  "is_available_for_new_content" : true
+}

@@ -1,0 +1,219 @@
+
+
+{% macro render_button(btn, button_class="btn") %}
+  {% if btn.icon and btn.icon.name %}
+  {% set button_class = button_class ~ " btn-icon--" ~ btn.icon_placement %}
+  {% endif %}
+  {% if btn.custom_class %}
+  {% set button_class = button_class ~ " " ~ btn.custom_class %}
+  {% endif %}
+  {% set href = btn.link.url.href %}
+  {% if btn.link.url.type == "EMAIL_ADDRESS" %}
+  {% set href = "mailto:" + href %}
+  {% endif %}
+  {% set rel = [] %}
+  {% if btn.link.no_follow %}
+  {% do rel.append("nofollow") %}
+  {% endif %}
+  {% if btn.link.open_in_new_tab %}
+  {% do rel.append("noopener") %}
+  {% endif %}
+  <a class="{{ button_class }}" href="{{ href|escape_url if href }}" {% if btn.link.open_in_new_tab %} target="_blank"{% endif %}{% if rel %} rel="{{ rel|join(" ")|escape_attr }}"{% endif %}>
+    <span>{{ btn.text|escape_html }}</span>
+    {% if btn.icon and btn.icon.name %}
+    {% icon name="{{ btn.icon.name }}" style="{{ btn.icon.type }}" unicode="{{ btn.icon.unicode }}" icon_set="{{ btn.icon.icon_set }}" no_wrapper=true %}
+    {% endif %}
+  </a>
+{% endmacro %}
+
+
+
+<div class="custom-card"{% if module.custom_id %} id="{{ module.custom_id }}"{% endif %}>
+  
+  {% set containerClass = "custom-card__container" %}
+  {% if module.style.card.shadow %}
+  {% set containerClass = containerClass ~ " cr_shadow cr_shadow--"~module.style.card.shadow %}
+  {% endif %}
+  {% if module.style.card.alignment.horizontal_align %}
+  {% set containerClass = containerClass ~ " halign--"~module.style.card.alignment.horizontal_align|lower %}
+  {% endif %}
+  {% if module.style.card.alignment.vertical_align %}
+  {% set containerClass = containerClass ~ " valign--"~module.style.card.alignment.vertical_align|lower %}
+  {% endif %}
+  
+  <div class="{{ containerClass }}">
+    <div class="custom-card__content">
+      {% set subtitle_tag = module.style.subtitle.tag || "h1" %}
+      {{ '<' ~ subtitle_tag ~ ' class="custom-card__subtitle">' ~ module.subtitle.text ~ '</' ~ subtitle_tag ~ '>'|safe }}
+      {% if module.style.divider.type && module.style.divider.type == "above" %}
+      <span class="custom-card__divider above"></span>
+      {% endif %}
+      {% set title_tag = module.style.title.tag || "h1" %}
+      {{ '<' ~ title_tag ~ ' class="custom-card__title">' ~ module.title.text ~ '</' ~ title_tag ~ '>'|safe }}
+      {% if module.style.divider.type && module.style.divider.type == "below" %}
+      <span class="custom-card__divider below"></span>
+      {% endif %}
+      <div class="custom-card__description">
+        {{ module.description.rich_text }}
+      </div>
+      {% if module.button.type %}
+      <div class="custom-card__button-wrapper">
+        {% if module.button.type == "button" %}
+        {{ render_button(module.button, "custom-card__button") }}
+        {% elif module.button.type == "cta" %}
+        {% cta guid="{{ module.button.cta }}" %}
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% if module.style.card.bg_type == "image" %}
+    <div class="custom-card__overlay"></div>
+    {% endif %}
+  </div>
+  
+</div>
+
+{#
+  CSS Macros: render_color
+#}
+{% macro render_color(value) %}
+  {% if value.color %}
+    {% set colorhex = value.color|convert_rgb %}
+    {% if value.opacity != null %}
+    {% set coloropacity = value.opacity / 100 %}
+    {% else %}
+    {% set coloropacity = '1' %}
+    {% endif %}
+    rgba({{ colorhex }}, {{ coloropacity }})
+  {% endif %}
+{% endmacro %}
+
+{# 
+ CSS Macro: render_button_style
+#}
+{% macro render_button_style(button_style, buttonClass) %}
+
+  .{{ buttonClass }}:not(:hover):not(:focus):not(:active) {
+    {% if button_style.normal.text_color %}color: {{ render_color(button_style.normal.text_color) }};{% endif %}
+    {% if button_style.normal.background_color %}background-color: {{ render_color(button_style.normal.background_color) }};{% endif %}
+    {% if button_style.normal.display_border %}{{ button_style.normal.border.css }}{% endif %}
+  }
+  .{{ buttonClass }}:hover, .{{ buttonClass }}:focus, {{ buttonClass }}:active {
+    {% if button_style.hover.text_color %}color: {{ render_color(button_style.hover.text_color) }};{% endif %}
+    {% if button_style.hover.background_color %}background-color: {{ render_color(button_style.hover.background_color) }};{% endif %}
+    {% if button_style.hover.display_border %}{{ button_style.hover.border.css }}{% endif %}
+  }
+
+  .{{ buttonClass }} {
+    {% if button_style.font %}
+    {{ button_style.font.css }};
+    {% endif %}
+    {% if button_style.text_transform %}
+     text-transform: {{ button_style.text_transform }};
+    {% endif %}
+    {% if button_style.override_spacing %}
+    {{ button_style.spacing.css }}
+    {% endif %}
+    {% if button_style.override_corner %}
+    border-radius: {{ button_style.corner_radius ~ "px" }};
+    {% endif %}
+  }
+{% endmacro %}
+
+
+{% require_css %}
+<style>
+  {% scope_css %}
+
+  .custom-card {
+    {% if module.style.card.shadow %}
+    --cr-shadow-color: {{ render_color(module.style.card.shadow_color) }};
+    {% endif %}
+  }
+
+  .custom-card__container {
+    {# Background #}
+    {% if module.style.card.bg_type %}
+    {% if module.style.card.bg_type == "color" %}
+    background-color: {{ render_color(module.style.card.bg_color) }};
+    {% elif module.style.card.bg_type == "gradient" %}
+    background: {{ module.style.card.bg_gradient.css }};
+    {% elif module.style.card.bg_type == "image" %}
+    {{ module.style.card.bg_image.css }};
+    {% endif %}
+    {% endif %}
+    {# #}
+    {{ module.style.card.spacing.spacing.css }};
+    {{ module.style.card.text_alignment.css }};
+    {{ module.style.card.border.css }};
+    {% if module.style.card.set_max_width %}
+    max-width: {{ module.style.card.max_width ~ "px" }};
+    {% endif %}
+    border-radius: {{ module.style.card.border_radius ~ "px" }};
+  }
+
+  .custom-card__container h1,
+  .custom-card__container h2,
+  .custom-card__container h3,
+  .custom-card__container h4,
+  .custom-card__container h5,
+  .custom-card__container h6,
+  .custom-card__container p,
+  .custom-card__container a:not(.button) {
+    color: {{ render_color(module.style.card.text_color) }};
+  }
+  
+  .custom-card__overlay {
+    background-color: {{ render_color(module.style.card.overlay_color) }};
+    border-radius: {{ module.style.card.border_radius ~ "px" }};
+  }
+  
+  .custom-card__container .custom-card__subtitle {
+    {{ module.style.subtitle.font.css }};
+    text-transform: {{ module.style.subtitle.text_transform }};
+  }
+  
+  .custom-card__container .custom-card__title {
+    {{ module.style.title.font.css }};
+    {{ module.style.title.spacing.css }};
+    text-transform: {{ module.style.title.text_transform }};
+    background-color: {{ render_color(module.style.title.background_color) }};
+  }
+  
+  {% if module.style.divider.type %}
+  .custom-card__divider {
+    height: {{ module.style.divider.height ~ "px" }};
+    max-width: {{ module.style.divider.width ~ "px" }};
+    background: {{ render_color(module.style.divider.color) }};
+  }
+  {% endif %}
+  
+  .custom-card__container .custom-card__description {
+    {{ module.style.description.spacing.css }};
+    {{ module.style.description.text_alignment.css }};
+  }
+  
+  {# Button #}
+
+  .custom-card__button-wrapper {
+    justify-content: {{ module.style.card.text_alignment.text_align }};
+  }
+
+  {% if module.button.type && module.button.type == "button" %}
+  {{ render_button_style(module.style.button, "custom-card__button") }}
+  {% endif %}
+  
+  {# Mobile #}
+
+  @media (max-width: 767px) {
+    .custom-card__container {
+      {% if module.style.card.spacing.mobile_separate %}
+      {{ module.style.card.spacing.spacing_mobile.css }}
+      {% endif %}
+    }
+  }
+  
+  
+  {% end_scope_css %}
+</style>
+{% end_require_css %}
